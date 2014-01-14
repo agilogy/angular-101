@@ -1,0 +1,22 @@
+{
+  "name": "angular-101",
+  "version": "0.0.0",
+  "authors": [
+    "Jose Raya <jose.raya@agilogy.com>",
+    "Manel Perez <manel.perez@agilogy.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.8",
+    "angular-bootstrap": "~0.10.0",
+    "metro-bootstrap": "https://github.com/igorlima/metro-bootstrap.git"
+  }
+}
