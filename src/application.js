@@ -1,4 +1,4 @@
-var calendar = angular.module('calendar', []);
+var calendar = angular.module('calendar', ['ui.bootstrap']);
 calendar.factory('CalendarService', function() {
 	return {
 		weeksFor: function(date) {
@@ -23,7 +23,7 @@ calendar.factory('CalendarService', function() {
 				for (var d=0; d < 7; d++ ) {
 					var events = [];
 					if (first.getTime() === today.getTime()) {
-						events = [{text:'Angular day @ MWC'},{text: 'Angular 101 workshop'}]
+						events = [{description:'Angular day @ MWC'},{description: 'Angular 101 workshop'}]
 					}
 					days.push( {
 						date: new Date(first.getTime()),
@@ -34,10 +34,26 @@ calendar.factory('CalendarService', function() {
 				result.push(days);
 			}
 			return result;
+		},
+		addEvent: function(day, description) {
+			day.events.push({date: day.date, description: description});
 		}
 	}
-})
-calendar.controller('CalendarController', function ($scope, CalendarService) {
+});
+
+calendar.controller('AddEventController', function($scope, $modalInstance, title, event) {
+	$scope.title = title;
+	$scope.event = event;
+	$scope.ok = function () {
+    	$modalInstance.close($scope.event);
+	};
+
+	$scope.cancel = function () {
+		$modalInstance.dismiss('cancel');
+	};
+});
+
+calendar.controller('CalendarController', function ($scope, $modal, CalendarService) {
 
 	$scope.today = new Date();
 	$scope.$watch('today.getMonth()', function() {
@@ -49,5 +65,23 @@ calendar.controller('CalendarController', function ($scope, CalendarService) {
 	}
 	$scope.next = function() {
 		$scope.today.setMonth($scope.today.getMonth()+1);
+	}
+
+	$scope.addEvent = function(day) {
+		var modalInstance = $modal.open({
+		    templateUrl: 'addEvent.html',
+		    controller: 'AddEventController',
+		    backdrop: false,
+		    resolve: {
+		    	title: function() { return 'Add new event'; },
+		    	event: function() {
+		    		return {description: ""}
+		    	}
+		    }
+		 });
+
+		modalInstance.result.then(function (event) {
+		    CalendarService.addEvent(day, event.description);
+		});
 	}
 });
