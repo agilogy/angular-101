@@ -43,13 +43,14 @@ module.exports = function(grunt) {
 			vendorjs: {
 			    src: [
 			    	'bower_components/angular/angular.js',
-			    	'bower_components/angular-bootstrap/ui-bootstrap-tpls.js'],
+			    	'bower_components/angular-bootstrap/ui-bootstrap-tpls.js'
+			    ],
 			    dest: '_dist/vendor.js'
 			},
 			vendorcss: {
 			    src: [
-			    	'bower_components/bootstrap/dist/css/bootstrap.css',
-			    	'bower_components/metro-bootstrap/css/metro-bootstrap.css'],
+			    	'bower_components/metro-bootstrap/css/metro-bootstrap.css'
+			    ],
 			    dest: '_dist/vendor.css'
 			}
 
