@@ -7,13 +7,6 @@ calendar.factory('apiUrl', function(apiKey) {
 	}
 });
 
-/*calendar.config(['$httpProvider', function($httpProvider) {
-        $httpProvider.defaults.useXDomain = true;
-        delete $httpProvider.defaults.headers.common['X-Requested-With'];
-    }
-]);
-*/
-
 calendar.value('calendarId', function() {
 	var calendarId = localStorage.getItem('calendarId') 
 	if ( !calendarId ) {
@@ -50,18 +43,7 @@ calendar.factory('CalendarStore', function(calendarId, apiUrl, $http) {
 	}
 });
 
-//TODO: Get rid of this?
-calendar.run(function(CalendarStore) {
-	//Create the calendar if it does not exist yet
-	//Let's create the calendar if it does not exist already
-	CalendarStore.get().then(function(data) {
-		if (data === "null") {
-			//Calendar does not exist, create an empty one
-		}
-	});
-})
-
-calendar.factory('CalendarService', function(CalendarStore, $q, $filter) {
+calendar.factory('CalendarService', function(CalendarStore, $filter) {
 	var calendar = {};
 
 	var sameDate = function(date1, date2) {
@@ -100,10 +82,9 @@ calendar.factory('CalendarService', function(CalendarStore, $q, $filter) {
 
 	return {
 		weeksFor: function(date) {
-			var r = $q.defer();
 			var currentDay = firstDayOfWeek(new Date(date.getFullYear(), date.getMonth(), 1));
 
-			CalendarStore.get().then(function(c) {
+			return CalendarStore.get().then(function(c) {
 				calendar = c;
 				var result = [];
 				var showMoreWeeks = true;
@@ -117,9 +98,8 @@ calendar.factory('CalendarService', function(CalendarStore, $q, $filter) {
 					currentDay.setDate(currentDay.getDate()+7);
 					showMoreWeeks = currentDay.getMonth() === date.getMonth();
 				}
-				r.resolve(result);
+				return result;
 			});
-			return r.promise;
 		},
 		addEvent: function(day, description) {
 			day.events.push({date: day.date, description: description});
@@ -128,14 +108,19 @@ calendar.factory('CalendarService', function(CalendarStore, $q, $filter) {
 		updateEvent: function(day, event, newEvent) {
 			event.description = newEvent.description;
 			CalendarStore.store(calendar);
+		},
+		removeEvent: function(day, event) {
+			day.events.splice(day.events.indexOf(event),1);
+			CalendarStore.store(calendar);
 		}
 
 	}
 });
 
-calendar.controller('AddEventController', function($scope, $modalInstance, title, event) {
+calendar.controller('AddEventController', function($scope, $modalInstance, title, event, canDelete) {
 	$scope.title = title;
 	$scope.event = event;
+	$scope.canDelete = canDelete;
 	$scope.ok = function () {
     	$modalInstance.close($scope.event);
 	};
@@ -143,6 +128,10 @@ calendar.controller('AddEventController', function($scope, $modalInstance, title
 	$scope.cancel = function () {
 		$modalInstance.dismiss('cancel');
 	};
+
+	$scope.delete = function() {
+		$modalInstance.dismiss('delete');
+	}
 });
 
 calendar.controller('CalendarController', function ($scope, $modal, CalendarService) {
@@ -171,7 +160,8 @@ calendar.controller('CalendarController', function ($scope, $modal, CalendarServ
 		    	title: function() { return 'Add new event'; },
 		    	event: function() {
 		    		return {description: ""}
-		    	}
+		    	},
+		    	canDelete: function() { return false; }
 		    }
 		 });
 
@@ -189,7 +179,8 @@ calendar.controller('CalendarController', function ($scope, $modal, CalendarServ
 		    	title: function() { return 'Edit event'; },
 		    	event: function() {
 		    		return {date: event.date, description: event.description};
-		    	}
+		    	},
+		    	canDelete: function() { return true; }
 		    }
 		 });
 
@@ -197,6 +188,10 @@ calendar.controller('CalendarController', function ($scope, $modal, CalendarServ
 		    event.description = newEvent.description;
 		   	CalendarService.updateEvent(day, event, newEvent);
 
+		}, function(reason) {
+			if (reason === 'delete') {
+				CalendarService.removeEvent(day, event);
+			}
 		});
 		window.event.stopPropagation();
 	}
