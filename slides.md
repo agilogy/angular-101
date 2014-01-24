@@ -69,6 +69,20 @@ Point your browser to `http://localhost:3000/`
 <small>If you are on windows, you will need to also run bower install</small>
 ---
 ## STEP 1: Templates and controllers
+    
+Declaring the application
+
+Using templates and controllers
+--
+### Set up the application
+
+    <html ng-app="calendar">
+
+and
+
+    var calendar = angular.module('calendar', []);
+
+--
 
 This is a template:
 
